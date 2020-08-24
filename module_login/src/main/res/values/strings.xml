@@ -1,0 +1,9 @@
+<resources>
+    <string name="login_name">登录模块</string>
+
+    <string name="login_rationale_wr">需要获取如下权限：手机读写、存储</string>
+    <string name="login_rationale_r">需要获取如下权限：手机读写权限</string>
+    <string name="login_rationale_ask_again">
+        点击前往设置中心，开启嗨麦直播所需要的权限。
+    </string>
+</resources>
