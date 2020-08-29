@@ -1,5 +1,8 @@
 package com.release.mvvm2.http;
 
+import android.util.Log;
+import android.webkit.WebSettings;
+
 import com.release.base.utils.CommonUtil;
 import com.release.base.utils.LogUtils;
 import com.release.base.utils.StringUtils;
@@ -74,7 +77,7 @@ public class RetrofitHelper {
                     builder = new OkHttpClient.Builder()
                             .cache(cache)
                             .addInterceptor(new headerIntercepteor())
-                            .addNetworkInterceptor(new CacheInterceptor())
+//                            .addNetworkInterceptor(new CacheInterceptor())
                             .sslSocketFactory(sslParams.sSLSocketFactory, sslParams.trustManager)
                             .retryOnConnectionFailure(true)
                             .connectTimeout(30, TimeUnit.SECONDS)
@@ -114,27 +117,27 @@ public class RetrofitHelper {
         @Override
         public Response intercept(Chain chain) throws IOException {
             final Request request = chain.request();
+            long startTime = System.currentTimeMillis();
+            Response response = chain.proceed(chain.request());
+            long endTime = System.currentTimeMillis();
+            long duration = endTime - startTime;
+            String content = response.body().string();
+
             Buffer requestBuffer = new Buffer();
-
-            if (request == null)
-                throw new RuntimeException("Request返回值不能为空");
-
             RequestBody requestBody = request.body();
 
             if (requestBody != null)
                 requestBody.writeTo(requestBuffer);
-            else
-                LogUtils.d(TAG, "request.body() == null");
 
-            //打印url信息
-            LogUtils.w(request.url() + (requestBody != null ? "?" + _parseParams(requestBody, requestBuffer) : ""));
-            final Response response = chain.proceed(request);
+            Log.d( "cyc",request.url() + (requestBody != null ? "?" + _parseParams(requestBody, requestBuffer) : ""));
 
-            if (response == null) {
-                throw new RuntimeException("Response返回值不能为空");
-            }
+            Log.d("cyc",duration + " 毫秒\n" + content);
 
-            return response;
+            request.newBuilder()
+                    .removeHeader("User-Agent") //移除旧的
+                    .addHeader("User-Agent", WebSettings.getDefaultUserAgent(App.getInstance())) //添加真正的头部
+                    .build();
+            return chain.proceed(request);
         }
     }
 
